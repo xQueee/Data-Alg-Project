@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 
+// Function prototypes
 /**
  * @brief Compute the edit distance between two words A and B.
  * @param A The first word, as an array of characters.
@@ -18,7 +19,6 @@
  * length of A and n is the length of B. However, in larger cases, the space is
  * incredibly inefficient.
  */
-// Funtion prototype
 int nieveEdit(const std::vector<char>& A, const std::vector<char>& B);
 
 /**
@@ -27,7 +27,8 @@ int nieveEdit(const std::vector<char>& A, const std::vector<char>& B);
  * @param B The second word, as an array of characters.
  * @return The edit distance between A and B.
  * @details O(m*n) time complexity and O(min(m, n)) space complexity, where m is
- * the length of A and n is the length of B.
+ * the length of A and n is the length of B. This is possible by saving only the
+ * current and previous rows of the dynamic programming table.
  */
 int optimizedEdit(const std::vector<char>& A, const std::vector<char>& B);
 
@@ -38,7 +39,6 @@ int optimizedEdit(const std::vector<char>& A, const std::vector<char>& B);
  * @details This function will prompt the user to enter two words, and store
  * them in A and B, respectively.
  */
-// Function prototype
 void inputWords(std::vector<char>& A, std::vector<char>& B);
 
 /**
@@ -54,19 +54,37 @@ int main() {
   for (int size : sizes) {
     std::vector<char> A(size, 'a');
     std::vector<char> B(size, 'b');
+
     auto start = std::chrono::high_resolution_clock::now();
     int distance = nieveEdit(A, B);
     auto end = std::chrono::high_resolution_clock::now();
+
+    auto optimizedStart = std::chrono::high_resolution_clock::now();
+    int optimizedDistance = optimizedEdit(A, B);
+    auto optimizedEnd = std::chrono::high_resolution_clock::now();
+
     std::chrono::duration<double> elapsed = end - start;
+    std::chrono::duration<double> optimizedElapsed =
+        optimizedEnd - optimizedStart;
+
+    std::cout << "Naive: " << std::endl;
     std::cout << "Edit Distance for size " << size << ": " << distance
               << std::endl;
     std::cout << "Time for size " << size << ": " << elapsed.count()
               << " seconds." << std::endl;
-    std::cout << "Memory used for size " << size << ": " << size * size
-              << sizeof(char) << " bytes." << std::endl;
+    std::cout << "Memory used for size " << size << ": "
+              << size * size * sizeof(char) << " bytes." << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "Optimized: " << std::endl;
+    std::cout << "Edit Distance for size " << size << ": " << optimizedDistance
+              << std::endl;
+    std::cout << "Time for size " << size << ": " << optimizedElapsed.count()
+              << " seconds." << std::endl;
+    std::cout << "Memory used for size " << size << ": " << size * sizeof(char)
+              << " bytes." << std::endl;
     std::cout << std::endl;
   }
-
   return 0;
 }
 
@@ -106,6 +124,29 @@ int nieveEdit(const std::vector<char>& A, const std::vector<char>& B) {
 int optimizedEdit(const std::vector<char>& A, const std::vector<char>& B) {
   int m = A.size();
   int n = B.size();
+  std::vector<int> prev(n + 1, 0);  // Initialize the previous row
+  std::vector<int> curr(n + 1, 0);  // Initialize the current row
+
+  for (int i = 0; i <= m; ++i) {
+    for (int j = 0; j <= n; ++j) {
+      if (i == 0) {
+        curr[j] = j;  // Base case for transforming A[0..0] to B[0..j]
+      } else if (j == 0) {
+        curr[j] = i;  // Base case for transforming A[0..i] to B[0..0]
+      } else if (A[i - 1] == B[j - 1]) {
+        curr[j] = prev[j - 1];  // No operation needed
+      } else {
+        int insert = curr[j - 1] + 1;                        // Insertion
+        int del = prev[j] + 1;                               // Deletion
+        int replace = prev[j - 1] + (A[i - 1] != B[j - 1]);  // Replacement
+
+        // Take the minimum of insert, delete, and replace
+        curr[j] = std::min(std::min(insert, del), replace);
+      }
+    }
+    prev = curr;  // Update the previous row
+  }
+  return curr[n];  // Return the edit distance between A[0..m] and B[0..n]
 }
 
 void inputWords(std::vector<char>& A, std::vector<char>& B) {
