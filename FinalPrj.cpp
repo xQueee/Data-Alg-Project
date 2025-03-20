@@ -19,7 +19,7 @@
  * length of A and n is the length of B. However, in larger cases, the space is
  * incredibly inefficient.
  */
-int nieveEdit(const std::vector<char>& A, const std::vector<char>& B);
+int naiveEdit(const std::vector<char>& A, const std::vector<char>& B);
 
 /**
  * @brief Compute the edit distance between two words A and B.
@@ -56,7 +56,7 @@ int main() {
     std::vector<char> B(size, 'b');
 
     auto start = std::chrono::high_resolution_clock::now();
-    int distance = nieveEdit(A, B);
+    int distance = naiveEdit(A, B);
     auto end = std::chrono::high_resolution_clock::now();
 
     auto optimizedStart = std::chrono::high_resolution_clock::now();
@@ -92,7 +92,7 @@ int main() {
 }
 
 // Function definitions
-int nieveEdit(const std::vector<char>& A, const std::vector<char>& B) {
+int naiveEdit(const std::vector<char>& A, const std::vector<char>& B) {
   int m = A.size();
   int n = B.size();
 
