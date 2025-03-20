@@ -48,10 +48,10 @@ void inputWords(std::vector<char>& A, std::vector<char>& B);
  * example, is O(n^2) as m and n are the same.
  */
 int main() {
-  std::vector<int> sizes = {10,    20,    40,    80,    160,   320,
-                            640,   1280,  2560,  5120,  10240, 20480,
-                            30000, 40960, 50000, 60000, 70000, 81920};
-  for (int size : sizes) {
+  std::vector<long long int> sizes = {
+      10,   25,   50,    75,    100,   250,   500,    750,    1000,  2500,
+      5000, 7500, 10000, 25000, 50000, 75000, 100000, 125000, 150000};
+  for (long long int size : sizes) {
     std::vector<char> A(size, 'a');
     std::vector<char> B(size, 'b');
 
@@ -67,13 +67,16 @@ int main() {
     std::chrono::duration<double> optimizedElapsed =
         optimizedEnd - optimizedStart;
 
+    long long int naiveSpace = size * size * sizeof(char);
+    long long int optimizedSpace = size * sizeof(char);
+
     std::cout << "Naive: " << std::endl;
     std::cout << "Edit Distance for size " << size << ": " << distance
               << std::endl;
     std::cout << "Time for size " << size << ": " << elapsed.count()
               << " seconds." << std::endl;
-    std::cout << "Memory used for size " << size << ": "
-              << size * size * sizeof(char) << " bytes." << std::endl;
+    std::cout << "Memory used for size " << size << ": " << naiveSpace
+              << " bytes." << std::endl;
     std::cout << std::endl;
 
     std::cout << "Optimized: " << std::endl;
@@ -81,7 +84,7 @@ int main() {
               << std::endl;
     std::cout << "Time for size " << size << ": " << optimizedElapsed.count()
               << " seconds." << std::endl;
-    std::cout << "Memory used for size " << size << ": " << size * sizeof(char)
+    std::cout << "Memory used for size " << size << ": " << optimizedSpace
               << " bytes." << std::endl;
     std::cout << std::endl;
   }
