@@ -6,6 +6,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <ctime>
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -48,9 +50,31 @@ void inputWords(std::vector<char>& A, std::vector<char>& B);
  * example, is O(n^2) as m and n are the same.
  */
 int main() {
-  std::vector<long long int> sizes = {
-      10,   25,   50,    75,    100,   250,   500,    750,    1000,  2500,
-      5000, 7500, 10000, 25000, 50000, 75000, 100000, 125000, 150000};
+  std::ifstream inputFile("sizes.txt");
+
+  if (!inputFile) {
+    std::cerr << "Error opening input file." << std::endl;
+    return 1;
+  }
+
+  std::time_t now = std::time(nullptr);
+  std::tm* localTime = std::localtime(&now);
+  char filename[100];
+  std::strftime(filename, sizeof(filename), "results_%Y%m%d_%H%M%S.txt",
+                localTime);
+
+  std::ofstream outputFile(filename, std::ios::trunc);
+  if (!outputFile) {
+    std::cerr << "Error creating output file." << std::endl;
+    return 1;
+  }
+
+  std::vector<long long int> sizes;
+  long long int size;
+  while (inputFile >> size) {
+    sizes.push_back(size);
+  }
+
   for (long long int size : sizes) {
     std::vector<char> A(size, 'a');
     std::vector<char> B(size, 'b');
@@ -70,24 +94,27 @@ int main() {
     long long int naiveSpace = size * size * sizeof(char);
     long long int optimizedSpace = size * sizeof(char);
 
-    std::cout << "Naive: " << std::endl;
-    std::cout << "Edit Distance for size " << size << ": " << distance
-              << std::endl;
-    std::cout << "Time for size " << size << ": " << elapsed.count()
-              << " seconds." << std::endl;
-    std::cout << "Memory used for size " << size << ": " << naiveSpace
-              << " bytes." << std::endl;
-    std::cout << std::endl;
+    outputFile << "Naive: " << std::endl;
+    outputFile << "Edit Distance for size " << size << ": " << distance
+               << std::endl;
+    outputFile << "Time for size " << size << ": " << elapsed.count()
+               << " seconds." << std::endl;
+    outputFile << "Memory used for size " << size << ": " << naiveSpace
+               << " bytes." << std::endl;
+    outputFile << std::endl;
 
-    std::cout << "Optimized: " << std::endl;
-    std::cout << "Edit Distance for size " << size << ": " << optimizedDistance
-              << std::endl;
-    std::cout << "Time for size " << size << ": " << optimizedElapsed.count()
-              << " seconds." << std::endl;
-    std::cout << "Memory used for size " << size << ": " << optimizedSpace
-              << " bytes." << std::endl;
-    std::cout << std::endl;
+    outputFile << "Optimized: " << std::endl;
+    outputFile << "Edit Distance for size " << size << ": " << optimizedDistance
+               << std::endl;
+    outputFile << "Time for size " << size << ": " << optimizedElapsed.count()
+               << " seconds." << std::endl;
+    outputFile << "Memory used for size " << size << ": " << optimizedSpace
+               << " bytes." << std::endl;
+    outputFile << std::endl;
   }
+  inputFile.close();
+  outputFile.close();
+  std::cout << "Results have been written to " << filename << std::endl;
   return 0;
 }
 
